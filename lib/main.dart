@@ -61,10 +61,12 @@ class MyNavigationBarState extends State<MyNavigationBar> {
     Next(
       database: database,
     ),
-    Text('Search Page',
-        style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold)),
-    Text('Search Page',
-        style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold)),
+    Wait(
+      database: database,
+    ),
+    Archive(
+      database: database,
+    ),
   ];
 
   void _onItemTapped(int index) {
@@ -138,6 +140,10 @@ class PlusMinusEntry extends PopupMenuEntry<int> {
 }
 
 class PlusMinusEntryState extends State<PlusMinusEntry> {
+  bool needToDo = false;
+  bool rightNow = false;
+  bool forMe = false;
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -213,17 +219,17 @@ class PlusMinusEntryState extends State<PlusMinusEntry> {
                           ),
                           GestureDetector(
                             onTap: () {
-                              // widget.database.updateTask(
-                              //   Task(
-                              //     id: widget.task.id,
-                              //     list: 'Inbox',
-                              //     name: widget.task.name,
-                              //     done: widget.task.done,
-                              //     project: widget.task.project,
-                              //   ),
-                              // );
-                              // Navigator.of(context, rootNavigator: true).pop();
-                              // Navigator.of(context, rootNavigator: true).pop();
+                              widget.database.moveTaskToProject(
+                                Task(
+                                  id: widget.task.id,
+                                  list: widget.task.list,
+                                  name: widget.task.name,
+                                  done: widget.task.done,
+                                  project: widget.task.project,
+                                ),
+                              );
+                              Navigator.of(context, rootNavigator: true).pop();
+                              Navigator.of(context, rootNavigator: true).pop();
                             },
                             child: Text('Проекты'),
                           ),
@@ -286,7 +292,125 @@ class PlusMinusEntryState extends State<PlusMinusEntry> {
               'Переместить',
             ),
           ),
-          Text('Пройти по алгоритму'),
+          GestureDetector(
+            onTap: () {
+              showDialog(
+                context: context,
+                builder: (ctx) {
+                  return StatefulBuilder(builder: (context, setState) {
+                    return AlertDialog(
+                      content: Container(
+                        height: 280,
+                        width: 200,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Нужно ли что-то делать с задачей?',
+                              textAlign: TextAlign.center,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('Да'),
+                                Switch(
+                                  value: needToDo,
+                                  onChanged: (val) {
+                                    setState(() {
+                                      needToDo = val;
+                                    });
+                                  },
+                                ),
+                                Text('Нет'),
+                              ],
+                            ),
+                            Text('Сейчас?'),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('Да'),
+                                Switch(
+                                  value: rightNow,
+                                  onChanged: (val) {
+                                    setState(() {
+                                      rightNow = val;
+                                    });
+                                  },
+                                ),
+                                Text('Нет'),
+                              ],
+                            ),
+                            Text('Мне?'),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('Да'),
+                                Switch(
+                                  value: forMe,
+                                  onChanged: (val) {
+                                    setState(() {
+                                      forMe = val;
+                                    });
+                                  },
+                                ),
+                                Text('Нет'),
+                              ],
+                            ),
+                            ElevatedButton(
+                              onPressed: () async {
+                                if (needToDo) {
+                                  widget.database
+                                      .removeTaskEntryByList(widget.task.id);
+                                  Navigator.of(context, rootNavigator: true)
+                                      .pop();
+                                  Navigator.of(context, rootNavigator: true)
+                                      .pop();
+                                } else if (rightNow) {
+                                  widget.database.updateTask(Task(
+                                    id: widget.task.id,
+                                    list: 'Archive',
+                                    name: widget.task.name,
+                                    done: widget.task.done,
+                                    project: widget.task.project,
+                                  ));
+                                  Navigator.of(context, rootNavigator: true)
+                                      .pop();
+                                  Navigator.of(context, rootNavigator: true)
+                                      .pop();
+                                } else if (forMe) {
+                                  widget.database.updateTask(Task(
+                                    id: widget.task.id,
+                                    list: 'Wait',
+                                    name: widget.task.name,
+                                    done: widget.task.done,
+                                    project: widget.task.project,
+                                  ));
+                                  Navigator.of(context, rootNavigator: true)
+                                      .pop();
+                                  Navigator.of(context, rootNavigator: true)
+                                      .pop();
+                                }
+                                needToDo = false;
+                                rightNow = false;
+                                forMe = false;
+                              },
+                              child: Text(
+                                'Поехали',
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  });
+                },
+              );
+            },
+            child: Text(
+              'Пройти по алгоритму',
+            ),
+          ),
         ],
       ),
     );
@@ -342,62 +466,92 @@ class _InboxState extends State<Inbox> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<List<Task>>(
-      stream: widget.database.taskEntryByList('Inbox'),
-      builder: (ctx, snap) {
-        if (snap.hasData) {
-          return ListView.builder(
-            itemCount: snap.data?.length ?? 0,
-            itemBuilder: (ctx, index) {
-              return Slidable(
-                key: ValueKey(index),
-                endActionPane: ActionPane(
-                  motion: ScrollMotion(),
-                  children: [
-                    SlidableAction(
-                      onPressed: (ctx) {
-                        widget.database
-                            .removeTaskEntryByList(snap.data![index].id);
-                      },
-                      backgroundColor: Color(0xFFFE4A49),
-                      foregroundColor: Colors.white,
-                      icon: Icons.delete,
-                      label: 'Delete',
-                    ),
-                  ],
-                ),
-                child: GestureDetector(
-                  onLongPress: () => _showCustomMenu(snap.data![index]),
-                  onTapDown: _storePosition,
-                  child: Row(
+    return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (ctx) {
+              return AlertDialog(
+                content: Container(
+                  height: 100,
+                  width: 200,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Checkbox(
-                        value: snap.data?[index].done,
-                        onChanged: (val) {
-                          widget.database.updateTask(
-                            Task(
-                              id: snap.data![index].id,
-                              list: snap.data![index].list,
-                              name: snap.data![index].name,
-                              done: val!,
-                              project: snap.data![index].project,
-                            ),
-                          );
+                      Text('Введите названия задачи'),
+                      TextFormField(
+                        onFieldSubmitted: (text) {
+                          widget.database.addTask(name: text, list: 'Inbox');
+                          Navigator.of(context, rootNavigator: true).pop();
                         },
                       ),
-                      Text(
-                        snap.data?[index].name ?? '',
-                      )
                     ],
                   ),
                 ),
               );
             },
           );
-        } else {
-          return const CircularProgressIndicator();
-        }
-      },
+        },
+        child: Icon(Icons.add),
+      ),
+      body: StreamBuilder<List<Task>>(
+        stream: widget.database.taskEntryByList('Inbox'),
+        builder: (ctx, snap) {
+          if (snap.hasData) {
+            return ListView.builder(
+              itemCount: snap.data?.length ?? 0,
+              itemBuilder: (ctx, index) {
+                return Slidable(
+                  key: ValueKey(index),
+                  endActionPane: ActionPane(
+                    motion: ScrollMotion(),
+                    children: [
+                      SlidableAction(
+                        onPressed: (ctx) {
+                          widget.database
+                              .removeTaskEntryByList(snap.data![index].id);
+                        },
+                        backgroundColor: Color(0xFFFE4A49),
+                        foregroundColor: Colors.white,
+                        icon: Icons.delete,
+                        label: 'Delete',
+                      ),
+                    ],
+                  ),
+                  child: GestureDetector(
+                    onLongPress: () => _showCustomMenu(snap.data![index]),
+                    onTapDown: _storePosition,
+                    child: Row(
+                      children: [
+                        Checkbox(
+                          value: snap.data?[index].done,
+                          onChanged: (val) {
+                            widget.database.updateTask(
+                              Task(
+                                id: snap.data![index].id,
+                                list: snap.data![index].list,
+                                name: snap.data![index].name,
+                                done: val!,
+                                project: snap.data![index].project,
+                              ),
+                            );
+                          },
+                        ),
+                        Text(
+                          snap.data?[index].name ?? '',
+                        )
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          } else {
+            return Center(child: const CircularProgressIndicator());
+          }
+        },
+      ),
     );
   }
 }
@@ -452,59 +606,25 @@ class _NextState extends State<Next> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<List<Task>>(
-      stream: widget.database.taskEntryByList('Next'),
-      builder: (ctx, snap) {
-        if (snap.hasData) {
-          return ListView.builder(
-            itemCount: snap.data?.length ?? 0,
-            itemBuilder: (ctx, index) {
-              final projectName = snap.data?[index].project ?? '';
-              return Slidable(
-                key: ValueKey(index),
-                endActionPane: ActionPane(
-                  motion: ScrollMotion(),
-                  children: [
-                    SlidableAction(
-                      onPressed: (ctx) {
-                        widget.database
-                            .removeTaskEntryByList(snap.data![index].id);
-                      },
-                      backgroundColor: Color(0xFFFE4A49),
-                      foregroundColor: Colors.white,
-                      icon: Icons.delete,
-                      label: 'Delete',
-                    ),
-                  ],
-                ),
-                child: GestureDetector(
-                  onLongPress: () => _showCustomMenu(snap.data![index]),
-                  onTapDown: _storePosition,
-                  child: Row(
+    return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (ctx) {
+              return AlertDialog(
+                content: Container(
+                  height: 100,
+                  width: 200,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Checkbox(
-                        value: snap.data?[index].done,
-                        onChanged: (val) {
-                          widget.database.updateTask(
-                            Task(
-                              id: snap.data![index].id,
-                              list: snap.data![index].list,
-                              name: snap.data![index].name,
-                              done: val!,
-                              project: snap.data![index].project,
-                            ),
-                          );
+                      Text('Введите названия задачи'),
+                      TextFormField(
+                        onFieldSubmitted: (text) {
+                          widget.database.addTask(name: text, list: 'Next');
+                          Navigator.of(context, rootNavigator: true).pop();
                         },
-                      ),
-                      Text(
-                        snap.data?[index].name ?? '',
-                      ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      Text(
-                        projectName != 'None' ? projectName : '',
-                        style: TextStyle(fontSize: 10),
                       ),
                     ],
                   ),
@@ -512,48 +632,26 @@ class _NextState extends State<Next> {
               );
             },
           );
-        } else {
-          return const CircularProgressIndicator();
-        }
-      },
-    );
-  }
-}
-
-class ProjectScreen extends StatelessWidget {
-  const ProjectScreen({super.key, required this.database});
-
-  final AppDatabase database;
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<List<Project>>(
-      stream: database.allProjects(),
-      builder: (ctx, snap) {
-        if (snap.hasData) {
-          return ListView.builder(
-            itemCount: snap.data?.length ?? 0,
-            itemBuilder: (ctx, index) {
-              return GestureDetector(
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => ProjectScreenInfo(
-                        database: database,
-                        name: snap.data![index].name,
-                      ),
-                    ),
-                  );
-                },
-                child: Slidable(
+        },
+        child: Icon(Icons.add),
+      ),
+      body: StreamBuilder<List<Task>>(
+        stream: widget.database.taskEntryByList('Next'),
+        builder: (ctx, snap) {
+          if (snap.hasData) {
+            return ListView.builder(
+              itemCount: snap.data?.length ?? 0,
+              itemBuilder: (ctx, index) {
+                final projectName = snap.data?[index].project ?? '';
+                return Slidable(
                   key: ValueKey(index),
                   endActionPane: ActionPane(
                     motion: ScrollMotion(),
                     children: [
                       SlidableAction(
                         onPressed: (ctx) {
-                          database
-                              .removeProjectEntryByList(snap.data![index].id);
+                          widget.database
+                              .removeTaskEntryByList(snap.data![index].id);
                         },
                         backgroundColor: Color(0xFFFE4A49),
                         foregroundColor: Colors.white,
@@ -562,38 +660,159 @@ class ProjectScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: Row(
+                  child: GestureDetector(
+                    onLongPress: () => _showCustomMenu(snap.data![index]),
+                    onTapDown: _storePosition,
+                    child: Row(
+                      children: [
+                        Checkbox(
+                          value: snap.data?[index].done,
+                          onChanged: (val) {
+                            widget.database.updateTask(
+                              Task(
+                                id: snap.data![index].id,
+                                list: snap.data![index].list,
+                                name: snap.data![index].name,
+                                done: val!,
+                                project: snap.data![index].project,
+                              ),
+                            );
+                          },
+                        ),
+                        Text(
+                          snap.data?[index].name ?? '',
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Text(
+                          projectName != 'None' ? projectName : '',
+                          style: TextStyle(fontSize: 10),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          } else {
+            return Center(child: const CircularProgressIndicator());
+          }
+        },
+      ),
+    );
+  }
+}
+
+class ProjectScreen extends StatefulWidget {
+  const ProjectScreen({super.key, required this.database});
+
+  final AppDatabase database;
+
+  @override
+  State<ProjectScreen> createState() => _ProjectScreenState();
+}
+
+class _ProjectScreenState extends State<ProjectScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (ctx) {
+              return AlertDialog(
+                content: Container(
+                  height: 100,
+                  width: 200,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Checkbox(
-                        value: snap.data?[index].done,
-                        onChanged: (val) {
-                          database.updateProject(
-                            Project(
-                              id: snap.data![index].id,
-                              name: snap.data![index].name,
-                              done: val!,
-                            ),
-                          );
+                      Text('Введите названия проекта'),
+                      TextFormField(
+                        onFieldSubmitted: (text) {
+                          widget.database.addProject(text);
+                          Navigator.of(context, rootNavigator: true).pop();
                         },
                       ),
-                      Text(
-                        snap.data?[index].name ?? '',
-                      )
                     ],
                   ),
                 ),
               );
             },
           );
-        } else {
-          return const CircularProgressIndicator();
-        }
-      },
+        },
+        child: Icon(Icons.add),
+      ),
+      body: StreamBuilder<List<Project>>(
+        stream: widget.database.allProjects(),
+        builder: (ctx, snap) {
+          if (snap.hasData) {
+            return ListView.builder(
+              itemCount: snap.data?.length ?? 0,
+              itemBuilder: (ctx, index) {
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => ProjectScreenInfo(
+                          database: widget.database,
+                          name: snap.data![index].name,
+                        ),
+                      ),
+                    );
+                  },
+                  child: Slidable(
+                    key: ValueKey(index),
+                    endActionPane: ActionPane(
+                      motion: ScrollMotion(),
+                      children: [
+                        SlidableAction(
+                          onPressed: (ctx) {
+                            widget.database
+                                .removeProjectEntryByList(snap.data![index].id);
+                          },
+                          backgroundColor: Color(0xFFFE4A49),
+                          foregroundColor: Colors.white,
+                          icon: Icons.delete,
+                          label: 'Delete',
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Checkbox(
+                          value: snap.data?[index].done,
+                          onChanged: (val) {
+                            widget.database.updateProject(
+                              Project(
+                                id: snap.data![index].id,
+                                name: snap.data![index].name,
+                                done: val!,
+                              ),
+                            );
+                          },
+                        ),
+                        Text(
+                          snap.data?[index].name ?? '',
+                        )
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          } else {
+            return Center(child: const CircularProgressIndicator());
+          }
+        },
+      ),
     );
   }
 }
 
-class ProjectScreenInfo extends StatelessWidget {
+class ProjectScreenInfo extends StatefulWidget {
   const ProjectScreenInfo(
       {super.key, required this.database, required this.name});
 
@@ -601,16 +820,53 @@ class ProjectScreenInfo extends StatelessWidget {
   final String name;
 
   @override
+  State<ProjectScreenInfo> createState() => _ProjectScreenInfoState();
+}
+
+class _ProjectScreenInfoState extends State<ProjectScreenInfo> {
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (ctx) {
+              return AlertDialog(
+                content: Container(
+                  height: 100,
+                  width: 200,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('Введите названия задачи'),
+                      TextFormField(
+                        onFieldSubmitted: (text) {
+                          widget.database.addTask(
+                            name: text,
+                            list: 'Next',
+                            project: widget.name,
+                          );
+                          Navigator.of(context, rootNavigator: true).pop();
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+        child: Icon(Icons.add),
+      ),
       appBar: AppBar(
-        title: Text(name),
+        title: Text(widget.name),
       ),
       body: Column(
         children: [
           Expanded(
             child: StreamBuilder<List<Task>>(
-              stream: database.projectTasksEntryByList(name),
+              stream: widget.database.projectTasksEntryByList(widget.name),
               builder: (ctx, snap) {
                 if (snap.hasData) {
                   return ListView.builder(
@@ -623,7 +879,7 @@ class ProjectScreenInfo extends StatelessWidget {
                           children: [
                             SlidableAction(
                               onPressed: (ctx) {
-                                database.removeTaskEntryByList(
+                                widget.database.removeTaskEntryByList(
                                     snap.data![index].id);
                               },
                               backgroundColor: Color(0xFFFE4A49),
@@ -638,7 +894,7 @@ class ProjectScreenInfo extends StatelessWidget {
                             Checkbox(
                               value: snap.data?[index].done,
                               onChanged: (val) {
-                                database.updateTask(
+                                widget.database.updateTask(
                                   Task(
                                     id: snap.data![index].id,
                                     name: snap.data![index].name,
@@ -658,12 +914,292 @@ class ProjectScreenInfo extends StatelessWidget {
                     },
                   );
                 } else {
-                  return const CircularProgressIndicator();
+                  return Center(child: const CircularProgressIndicator());
                 }
               },
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class Wait extends StatefulWidget {
+  const Wait({super.key, required this.database});
+
+  final AppDatabase database;
+
+  @override
+  State<Wait> createState() => _WaitState();
+}
+
+class _WaitState extends State<Wait> {
+  var _count = 0;
+
+  var _tapPosition;
+
+  void _storePosition(TapDownDetails details) {
+    _tapPosition = details.globalPosition;
+  }
+
+  void _showCustomMenu(Task task) async {
+    if (_tapPosition == null) {
+      return;
+    }
+    final overlay = Overlay.of(context).context.findRenderObject();
+    if (overlay == null) {
+      return;
+    }
+
+    final delta = await showMenu(
+      context: context,
+      items: <PopupMenuEntry<int>>[PlusMinusEntry(widget.database, task)],
+      position: RelativeRect.fromRect(
+          _tapPosition! & const Size(40, 40), // smaller rect, the touch area
+          Offset.zero &
+              overlay.semanticBounds.size // Bigger rect, the entire screen
+          ),
+    );
+
+    // delta would be null if user taps on outside the popup menu
+    // (causing it to close without making selection)
+    if (delta == null) {
+      return;
+    }
+
+    setState(() {
+      _count = _count + delta;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (ctx) {
+              return AlertDialog(
+                content: Container(
+                  height: 100,
+                  width: 200,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('Введите названия задачи'),
+                      TextFormField(
+                        onFieldSubmitted: (text) {
+                          widget.database.addTask(name: text, list: 'Wait');
+                          Navigator.of(context, rootNavigator: true).pop();
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+        child: Icon(Icons.add),
+      ),
+      body: StreamBuilder<List<Task>>(
+        stream: widget.database.taskEntryByList('Wait'),
+        builder: (ctx, snap) {
+          if (snap.hasData) {
+            return ListView.builder(
+              itemCount: snap.data?.length ?? 0,
+              itemBuilder: (ctx, index) {
+                return Slidable(
+                  key: ValueKey(index),
+                  endActionPane: ActionPane(
+                    motion: ScrollMotion(),
+                    children: [
+                      SlidableAction(
+                        onPressed: (ctx) {
+                          widget.database
+                              .removeTaskEntryByList(snap.data![index].id);
+                        },
+                        backgroundColor: Color(0xFFFE4A49),
+                        foregroundColor: Colors.white,
+                        icon: Icons.delete,
+                        label: 'Delete',
+                      ),
+                    ],
+                  ),
+                  child: GestureDetector(
+                    onLongPress: () => _showCustomMenu(snap.data![index]),
+                    onTapDown: _storePosition,
+                    child: Row(
+                      children: [
+                        Checkbox(
+                          value: snap.data?[index].done,
+                          onChanged: (val) {
+                            widget.database.updateTask(
+                              Task(
+                                id: snap.data![index].id,
+                                list: snap.data![index].list,
+                                name: snap.data![index].name,
+                                done: val!,
+                                project: snap.data![index].project,
+                              ),
+                            );
+                          },
+                        ),
+                        Text(
+                          snap.data?[index].name ?? '',
+                        )
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          } else {
+            return Center(child: const CircularProgressIndicator());
+          }
+        },
+      ),
+    );
+  }
+}
+
+class Archive extends StatefulWidget {
+  const Archive({super.key, required this.database});
+
+  final AppDatabase database;
+
+  @override
+  State<Archive> createState() => _ArchiveState();
+}
+
+class _ArchiveState extends State<Archive> {
+  var _count = 0;
+
+  var _tapPosition;
+
+  void _storePosition(TapDownDetails details) {
+    _tapPosition = details.globalPosition;
+  }
+
+  void _showCustomMenu(Task task) async {
+    if (_tapPosition == null) {
+      return;
+    }
+    final overlay = Overlay.of(context).context.findRenderObject();
+    if (overlay == null) {
+      return;
+    }
+
+    final delta = await showMenu(
+      context: context,
+      items: <PopupMenuEntry<int>>[PlusMinusEntry(widget.database, task)],
+      position: RelativeRect.fromRect(
+          _tapPosition! & const Size(40, 40), // smaller rect, the touch area
+          Offset.zero &
+              overlay.semanticBounds.size // Bigger rect, the entire screen
+          ),
+    );
+
+    // delta would be null if user taps on outside the popup menu
+    // (causing it to close without making selection)
+    if (delta == null) {
+      return;
+    }
+
+    setState(() {
+      _count = _count + delta;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showDialog(
+            context: context,
+            builder: (ctx) {
+              return AlertDialog(
+                content: Container(
+                  height: 100,
+                  width: 200,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('Введите названия задачи'),
+                      TextFormField(
+                        onFieldSubmitted: (text) {
+                          widget.database.addTask(name: text, list: 'Archive');
+                          Navigator.of(context, rootNavigator: true).pop();
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+        child: Icon(Icons.add),
+      ),
+      body: StreamBuilder<List<Task>>(
+        stream: widget.database.taskEntryByList('Archive'),
+        builder: (ctx, snap) {
+          if (snap.hasData) {
+            return ListView.builder(
+              itemCount: snap.data?.length ?? 0,
+              itemBuilder: (ctx, index) {
+                return Slidable(
+                  key: ValueKey(index),
+                  endActionPane: ActionPane(
+                    motion: ScrollMotion(),
+                    children: [
+                      SlidableAction(
+                        onPressed: (ctx) {
+                          widget.database
+                              .removeTaskEntryByList(snap.data![index].id);
+                        },
+                        backgroundColor: Color(0xFFFE4A49),
+                        foregroundColor: Colors.white,
+                        icon: Icons.delete,
+                        label: 'Delete',
+                      ),
+                    ],
+                  ),
+                  child: GestureDetector(
+                    onLongPress: () => _showCustomMenu(snap.data![index]),
+                    onTapDown: _storePosition,
+                    child: Row(
+                      children: [
+                        Checkbox(
+                          value: snap.data?[index].done,
+                          onChanged: (val) {
+                            widget.database.updateTask(
+                              Task(
+                                id: snap.data![index].id,
+                                list: snap.data![index].list,
+                                name: snap.data![index].name,
+                                done: val!,
+                                project: snap.data![index].project,
+                              ),
+                            );
+                          },
+                        ),
+                        Text(
+                          snap.data?[index].name ?? '',
+                        )
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          } else {
+            return Center(child: const CircularProgressIndicator());
+          }
+        },
       ),
     );
   }

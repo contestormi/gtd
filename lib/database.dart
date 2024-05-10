@@ -57,11 +57,18 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Stream<List<Task>> projectTasksEntryByList(String name) {
-    return (select(tasks)..where((t) => t.project.equals(name))).watch();
+    return ((select(tasks)..where((t) => t.project.equals(name)))
+          ..orderBy(
+            [(v) => OrderingTerm(expression: v.done, mode: OrderingMode.asc)],
+          ))
+        .watch();
   }
 
   Stream<List<Project>> allProjects() {
-    return (select(projects)..where((t) => t.name.equals('None').not()))
+    return ((select(projects)..where((t) => t.name.equals('None').not()))
+          ..orderBy(
+            [(v) => OrderingTerm(expression: v.done, mode: OrderingMode.asc)],
+          ))
         .watch();
   }
 
@@ -88,6 +95,16 @@ class AppDatabase extends _$AppDatabase {
             name: 'Полежать на диване',
             done: false,
             project: 'None'),
+        TasksCompanion.insert(
+            list: 'Wait',
+            name: 'Муравьева - выслать титулы',
+            done: false,
+            project: 'None'),
+        TasksCompanion.insert(
+            list: 'Archive',
+            name: 'Устроиться на работу',
+            done: false,
+            project: 'None'),
       ]);
     });
     await batch((batch) {
@@ -110,6 +127,50 @@ class AppDatabase extends _$AppDatabase {
     } catch (e) {
       print(e);
     }
+  }
+
+  Future<void> addTask({
+    required String name,
+    required String list,
+    String project = 'None',
+  }) async {
+    try {
+      into(tasks).insert(
+        TasksCompanion.insert(
+          name: name,
+          project: project,
+          list: list,
+          done: false,
+        ),
+      );
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<void> addProject(String name) async {
+    try {
+      into(projects).insert(
+        ProjectsCompanion.insert(
+          name: name,
+          done: false,
+        ),
+      );
+    } catch (e) {
+      print(e);
+    }
+  }
+
+  Future<void> moveTaskToProject(Task task) async {
+    return transaction(() async {
+      await (delete(tasks)..where((t) => t.id.equals(task.id))).go();
+      await into(projects).insert(
+        ProjectsCompanion.insert(
+          name: task.name,
+          done: false,
+        ),
+      );
+    });
   }
 
   Future<void> updateProject(Project project) async {
