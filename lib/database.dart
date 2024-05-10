@@ -1,9 +1,12 @@
 import 'package:drift/drift.dart';
 import 'dart:io';
 import 'package:drift/native.dart';
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart';
+
+// ignore_for_file: depend_on_referenced_packages
 import 'package:sqlite3/sqlite3.dart';
 
 part 'database.g.dart';
@@ -125,7 +128,7 @@ class AppDatabase extends _$AppDatabase {
     try {
       await (update(tasks)..where((e) => e.id.equals(task.id))).write(task);
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
     }
   }
 
@@ -144,7 +147,7 @@ class AppDatabase extends _$AppDatabase {
         ),
       );
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
     }
   }
 
@@ -157,7 +160,7 @@ class AppDatabase extends _$AppDatabase {
         ),
       );
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
     }
   }
 
@@ -178,7 +181,7 @@ class AppDatabase extends _$AppDatabase {
       await (update(projects)..where((e) => e.id.equals(project.id)))
           .write(project);
     } catch (e) {
-      print(e);
+      debugPrint(e.toString());
     }
   }
 

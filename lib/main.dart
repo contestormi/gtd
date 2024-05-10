@@ -1,6 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
 import 'database.dart';
@@ -79,8 +77,10 @@ class MyNavigationBarState extends State<MyNavigationBar> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: const Text('Flutter BottomNavigationBar Example'),
-          backgroundColor: Colors.green),
+        title: const Text('GTD'),
+        backgroundColor: Colors.green,
+        centerTitle: true,
+      ),
       body: Center(
         child: _widgetOptions.elementAt(_selectedIndex),
       ),
@@ -93,22 +93,19 @@ class MyNavigationBarState extends State<MyNavigationBar> {
             BottomNavigationBarItem(
                 icon: Icon(Icons.account_tree),
                 label: 'Проекты',
-                backgroundColor: Colors.yellow),
+                backgroundColor: Colors.green),
             BottomNavigationBarItem(
-              icon: Icon(Icons.task_alt),
-              label: 'Текущие действия',
-              backgroundColor: Colors.blue,
-            ),
+                icon: Icon(Icons.task_alt),
+                label: 'Текущие действия',
+                backgroundColor: Colors.green),
             BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              label: 'Ожидание',
-              backgroundColor: Colors.blue,
-            ),
+                icon: Icon(Icons.person),
+                label: 'Ожидание',
+                backgroundColor: Colors.green),
             BottomNavigationBarItem(
-              icon: Icon(Icons.archive),
-              label: 'КНП',
-              backgroundColor: Colors.blue,
-            ),
+                icon: Icon(Icons.archive),
+                label: 'КНП',
+                backgroundColor: Colors.green),
           ],
           type: BottomNavigationBarType.shifting,
           currentIndex: _selectedIndex,
@@ -122,15 +119,12 @@ class MyNavigationBarState extends State<MyNavigationBar> {
 
 class PlusMinusEntry extends PopupMenuEntry<int> {
   @override
-  double height = 100;
+  final double height = 100;
 
   final AppDatabase database;
   final Task task;
 
-  PlusMinusEntry(this.database, this.task);
-
-  // height doesn't matter, as long as we are not giving
-  // initialValue to showMenu().
+  const PlusMinusEntry(this.database, this.task, {super.key});
 
   @override
   bool represents(int? value) => value == 1 || value == -1;
@@ -147,7 +141,7 @@ class PlusMinusEntryState extends State<PlusMinusEntry> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(left: 10.0),
+      padding: const EdgeInsets.only(left: 10.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -157,13 +151,13 @@ class PlusMinusEntryState extends State<PlusMinusEntry> {
                 context: context,
                 builder: (ctx) {
                   return AlertDialog(
-                    content: Container(
-                      height: 100,
+                    content: SizedBox(
+                      height: 70,
                       width: 200,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text('Введите названия задачи'),
+                          const Text('Введите названия задачи'),
                           TextFormField(
                             onFieldSubmitted: (text) {
                               widget.database.updateTask(
@@ -186,7 +180,7 @@ class PlusMinusEntryState extends State<PlusMinusEntry> {
                 },
               );
             },
-            child: Text('Переименовать'),
+            child: const Text('Переименовать'),
           ),
           GestureDetector(
             onTap: () {
@@ -194,13 +188,13 @@ class PlusMinusEntryState extends State<PlusMinusEntry> {
                 context: context,
                 builder: (ctx) {
                   return AlertDialog(
-                    content: Container(
-                      height: 150,
+                    content: SizedBox(
+                      height: 120,
                       width: 200,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text('Куда?'),
+                          const Text('Куда?'),
                           GestureDetector(
                             onTap: () {
                               widget.database.updateTask(
@@ -215,7 +209,7 @@ class PlusMinusEntryState extends State<PlusMinusEntry> {
                               Navigator.of(context, rootNavigator: true).pop();
                               Navigator.of(context, rootNavigator: true).pop();
                             },
-                            child: Text('Корзина'),
+                            child: const Text('Корзина'),
                           ),
                           GestureDetector(
                             onTap: () {
@@ -231,7 +225,7 @@ class PlusMinusEntryState extends State<PlusMinusEntry> {
                               Navigator.of(context, rootNavigator: true).pop();
                               Navigator.of(context, rootNavigator: true).pop();
                             },
-                            child: Text('Проекты'),
+                            child: const Text('Проекты'),
                           ),
                           GestureDetector(
                             onTap: () {
@@ -247,7 +241,7 @@ class PlusMinusEntryState extends State<PlusMinusEntry> {
                               Navigator.of(context, rootNavigator: true).pop();
                               Navigator.of(context, rootNavigator: true).pop();
                             },
-                            child: Text('Делегирование'),
+                            child: const Text('Делегирование'),
                           ),
                           GestureDetector(
                             onTap: () {
@@ -263,7 +257,7 @@ class PlusMinusEntryState extends State<PlusMinusEntry> {
                               Navigator.of(context, rootNavigator: true).pop();
                               Navigator.of(context, rootNavigator: true).pop();
                             },
-                            child: Text('Текущие действия'),
+                            child: const Text('Текущие действия'),
                           ),
                           GestureDetector(
                             onTap: () {
@@ -279,7 +273,7 @@ class PlusMinusEntryState extends State<PlusMinusEntry> {
                               Navigator.of(context, rootNavigator: true).pop();
                               Navigator.of(context, rootNavigator: true).pop();
                             },
-                            child: Text('КНП'),
+                            child: const Text('КНП'),
                           ),
                         ],
                       ),
@@ -288,7 +282,7 @@ class PlusMinusEntryState extends State<PlusMinusEntry> {
                 },
               );
             },
-            child: Text(
+            child: const Text(
               'Переместить',
             ),
           ),
@@ -299,21 +293,21 @@ class PlusMinusEntryState extends State<PlusMinusEntry> {
                 builder: (ctx) {
                   return StatefulBuilder(builder: (context, setState) {
                     return AlertDialog(
-                      content: Container(
+                      content: SizedBox(
                         height: 280,
                         width: 200,
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Text(
+                            const Text(
                               'Нужно ли что-то делать с задачей?',
                               textAlign: TextAlign.center,
                             ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text('Да'),
+                                const Text('Да'),
                                 Switch(
                                   value: needToDo,
                                   onChanged: (val) {
@@ -322,14 +316,14 @@ class PlusMinusEntryState extends State<PlusMinusEntry> {
                                     });
                                   },
                                 ),
-                                Text('Нет'),
+                                const Text('Нет'),
                               ],
                             ),
-                            Text('Сейчас?'),
+                            const Text('Сейчас?'),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text('Да'),
+                                const Text('Да'),
                                 Switch(
                                   value: rightNow,
                                   onChanged: (val) {
@@ -338,14 +332,14 @@ class PlusMinusEntryState extends State<PlusMinusEntry> {
                                     });
                                   },
                                 ),
-                                Text('Нет'),
+                                const Text('Нет'),
                               ],
                             ),
-                            Text('Мне?'),
+                            const Text('Мне?'),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text('Да'),
+                                const Text('Да'),
                                 Switch(
                                   value: forMe,
                                   onChanged: (val) {
@@ -354,7 +348,7 @@ class PlusMinusEntryState extends State<PlusMinusEntry> {
                                     });
                                   },
                                 ),
-                                Text('Нет'),
+                                const Text('Нет'),
                               ],
                             ),
                             ElevatedButton(
@@ -395,7 +389,7 @@ class PlusMinusEntryState extends State<PlusMinusEntry> {
                                 rightNow = false;
                                 forMe = false;
                               },
-                              child: Text(
+                              child: const Text(
                                 'Поехали',
                               ),
                             ),
@@ -407,7 +401,7 @@ class PlusMinusEntryState extends State<PlusMinusEntry> {
                 },
               );
             },
-            child: Text(
+            child: const Text(
               'Пройти по алгоритму',
             ),
           ),
@@ -428,7 +422,7 @@ class Inbox extends StatefulWidget {
 
 class _InboxState extends State<Inbox> {
   var _count = 0;
-  var _tapPosition;
+  late Offset? _tapPosition;
 
   void _storePosition(TapDownDetails details) {
     _tapPosition = details.globalPosition;
@@ -453,8 +447,6 @@ class _InboxState extends State<Inbox> {
           ),
     );
 
-    // delta would be null if user taps on outside the popup menu
-    // (causing it to close without making selection)
     if (delta == null) {
       return;
     }
@@ -473,13 +465,13 @@ class _InboxState extends State<Inbox> {
             context: context,
             builder: (ctx) {
               return AlertDialog(
-                content: Container(
+                content: SizedBox(
                   height: 100,
                   width: 200,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('Введите названия задачи'),
+                      const Text('Введите названия задачи'),
                       TextFormField(
                         onFieldSubmitted: (text) {
                           widget.database.addTask(name: text, list: 'Inbox');
@@ -493,7 +485,7 @@ class _InboxState extends State<Inbox> {
             },
           );
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
       body: StreamBuilder<List<Task>>(
         stream: widget.database.taskEntryByList('Inbox'),
@@ -505,17 +497,17 @@ class _InboxState extends State<Inbox> {
                 return Slidable(
                   key: ValueKey(index),
                   endActionPane: ActionPane(
-                    motion: ScrollMotion(),
+                    motion: const ScrollMotion(),
                     children: [
                       SlidableAction(
                         onPressed: (ctx) {
                           widget.database
                               .removeTaskEntryByList(snap.data![index].id);
                         },
-                        backgroundColor: Color(0xFFFE4A49),
+                        backgroundColor: const Color(0xFFFE4A49),
                         foregroundColor: Colors.white,
                         icon: Icons.delete,
-                        label: 'Delete',
+                        label: 'Удалить',
                       ),
                     ],
                   ),
@@ -548,7 +540,7 @@ class _InboxState extends State<Inbox> {
               },
             );
           } else {
-            return Center(child: const CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
         },
       ),
@@ -568,7 +560,7 @@ class Next extends StatefulWidget {
 class _NextState extends State<Next> {
   var _count = 0;
 
-  var _tapPosition;
+  late Offset? _tapPosition;
 
   void _storePosition(TapDownDetails details) {
     _tapPosition = details.globalPosition;
@@ -613,13 +605,13 @@ class _NextState extends State<Next> {
             context: context,
             builder: (ctx) {
               return AlertDialog(
-                content: Container(
+                content: SizedBox(
                   height: 100,
                   width: 200,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('Введите названия задачи'),
+                      const Text('Введите названия задачи'),
                       TextFormField(
                         onFieldSubmitted: (text) {
                           widget.database.addTask(name: text, list: 'Next');
@@ -633,7 +625,7 @@ class _NextState extends State<Next> {
             },
           );
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
       body: StreamBuilder<List<Task>>(
         stream: widget.database.taskEntryByList('Next'),
@@ -646,17 +638,17 @@ class _NextState extends State<Next> {
                 return Slidable(
                   key: ValueKey(index),
                   endActionPane: ActionPane(
-                    motion: ScrollMotion(),
+                    motion: const ScrollMotion(),
                     children: [
                       SlidableAction(
                         onPressed: (ctx) {
                           widget.database
                               .removeTaskEntryByList(snap.data![index].id);
                         },
-                        backgroundColor: Color(0xFFFE4A49),
+                        backgroundColor: const Color(0xFFFE4A49),
                         foregroundColor: Colors.white,
                         icon: Icons.delete,
-                        label: 'Delete',
+                        label: 'Удалить',
                       ),
                     ],
                   ),
@@ -682,12 +674,12 @@ class _NextState extends State<Next> {
                         Text(
                           snap.data?[index].name ?? '',
                         ),
-                        SizedBox(
+                        const SizedBox(
                           width: 10,
                         ),
                         Text(
                           projectName != 'None' ? projectName : '',
-                          style: TextStyle(fontSize: 10),
+                          style: const TextStyle(fontSize: 10),
                         ),
                       ],
                     ),
@@ -696,7 +688,7 @@ class _NextState extends State<Next> {
               },
             );
           } else {
-            return Center(child: const CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
         },
       ),
@@ -723,13 +715,13 @@ class _ProjectScreenState extends State<ProjectScreen> {
             context: context,
             builder: (ctx) {
               return AlertDialog(
-                content: Container(
+                content: SizedBox(
                   height: 100,
                   width: 200,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('Введите названия проекта'),
+                      const Text('Введите названия проекта'),
                       TextFormField(
                         onFieldSubmitted: (text) {
                           widget.database.addProject(text);
@@ -743,7 +735,7 @@ class _ProjectScreenState extends State<ProjectScreen> {
             },
           );
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
       body: StreamBuilder<List<Project>>(
         stream: widget.database.allProjects(),
@@ -766,17 +758,17 @@ class _ProjectScreenState extends State<ProjectScreen> {
                   child: Slidable(
                     key: ValueKey(index),
                     endActionPane: ActionPane(
-                      motion: ScrollMotion(),
+                      motion: const ScrollMotion(),
                       children: [
                         SlidableAction(
                           onPressed: (ctx) {
                             widget.database
                                 .removeProjectEntryByList(snap.data![index].id);
                           },
-                          backgroundColor: Color(0xFFFE4A49),
+                          backgroundColor: const Color(0xFFFE4A49),
                           foregroundColor: Colors.white,
                           icon: Icons.delete,
-                          label: 'Delete',
+                          label: 'Удалить',
                         ),
                       ],
                     ),
@@ -804,7 +796,7 @@ class _ProjectScreenState extends State<ProjectScreen> {
               },
             );
           } else {
-            return Center(child: const CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
         },
       ),
@@ -833,13 +825,13 @@ class _ProjectScreenInfoState extends State<ProjectScreenInfo> {
             context: context,
             builder: (ctx) {
               return AlertDialog(
-                content: Container(
+                content: SizedBox(
                   height: 100,
                   width: 200,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('Введите названия задачи'),
+                      const Text('Введите названия задачи'),
                       TextFormField(
                         onFieldSubmitted: (text) {
                           widget.database.addTask(
@@ -857,7 +849,7 @@ class _ProjectScreenInfoState extends State<ProjectScreenInfo> {
             },
           );
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
       appBar: AppBar(
         title: Text(widget.name),
@@ -875,17 +867,17 @@ class _ProjectScreenInfoState extends State<ProjectScreenInfo> {
                       return Slidable(
                         key: ValueKey(index),
                         endActionPane: ActionPane(
-                          motion: ScrollMotion(),
+                          motion: const ScrollMotion(),
                           children: [
                             SlidableAction(
                               onPressed: (ctx) {
                                 widget.database.removeTaskEntryByList(
                                     snap.data![index].id);
                               },
-                              backgroundColor: Color(0xFFFE4A49),
+                              backgroundColor: const Color(0xFFFE4A49),
                               foregroundColor: Colors.white,
                               icon: Icons.delete,
-                              label: 'Delete',
+                              label: 'Удалить',
                             ),
                           ],
                         ),
@@ -914,7 +906,7 @@ class _ProjectScreenInfoState extends State<ProjectScreenInfo> {
                     },
                   );
                 } else {
-                  return Center(child: const CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator());
                 }
               },
             ),
@@ -937,7 +929,7 @@ class Wait extends StatefulWidget {
 class _WaitState extends State<Wait> {
   var _count = 0;
 
-  var _tapPosition;
+  late Offset? _tapPosition;
 
   void _storePosition(TapDownDetails details) {
     _tapPosition = details.globalPosition;
@@ -982,13 +974,13 @@ class _WaitState extends State<Wait> {
             context: context,
             builder: (ctx) {
               return AlertDialog(
-                content: Container(
+                content: SizedBox(
                   height: 100,
                   width: 200,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('Введите названия задачи'),
+                      const Text('Введите названия задачи'),
                       TextFormField(
                         onFieldSubmitted: (text) {
                           widget.database.addTask(name: text, list: 'Wait');
@@ -1002,7 +994,7 @@ class _WaitState extends State<Wait> {
             },
           );
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
       body: StreamBuilder<List<Task>>(
         stream: widget.database.taskEntryByList('Wait'),
@@ -1014,17 +1006,17 @@ class _WaitState extends State<Wait> {
                 return Slidable(
                   key: ValueKey(index),
                   endActionPane: ActionPane(
-                    motion: ScrollMotion(),
+                    motion: const ScrollMotion(),
                     children: [
                       SlidableAction(
                         onPressed: (ctx) {
                           widget.database
                               .removeTaskEntryByList(snap.data![index].id);
                         },
-                        backgroundColor: Color(0xFFFE4A49),
+                        backgroundColor: const Color(0xFFFE4A49),
                         foregroundColor: Colors.white,
                         icon: Icons.delete,
-                        label: 'Delete',
+                        label: 'Удалить',
                       ),
                     ],
                   ),
@@ -1057,7 +1049,7 @@ class _WaitState extends State<Wait> {
               },
             );
           } else {
-            return Center(child: const CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
         },
       ),
@@ -1077,7 +1069,7 @@ class Archive extends StatefulWidget {
 class _ArchiveState extends State<Archive> {
   var _count = 0;
 
-  var _tapPosition;
+  late Offset? _tapPosition;
 
   void _storePosition(TapDownDetails details) {
     _tapPosition = details.globalPosition;
@@ -1122,13 +1114,13 @@ class _ArchiveState extends State<Archive> {
             context: context,
             builder: (ctx) {
               return AlertDialog(
-                content: Container(
+                content: SizedBox(
                   height: 100,
                   width: 200,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('Введите названия задачи'),
+                      const Text('Введите названия задачи'),
                       TextFormField(
                         onFieldSubmitted: (text) {
                           widget.database.addTask(name: text, list: 'Archive');
@@ -1142,7 +1134,7 @@ class _ArchiveState extends State<Archive> {
             },
           );
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
       body: StreamBuilder<List<Task>>(
         stream: widget.database.taskEntryByList('Archive'),
@@ -1154,17 +1146,17 @@ class _ArchiveState extends State<Archive> {
                 return Slidable(
                   key: ValueKey(index),
                   endActionPane: ActionPane(
-                    motion: ScrollMotion(),
+                    motion: const ScrollMotion(),
                     children: [
                       SlidableAction(
                         onPressed: (ctx) {
                           widget.database
                               .removeTaskEntryByList(snap.data![index].id);
                         },
-                        backgroundColor: Color(0xFFFE4A49),
+                        backgroundColor: const Color(0xFFFE4A49),
                         foregroundColor: Colors.white,
                         icon: Icons.delete,
-                        label: 'Delete',
+                        label: 'Удалить',
                       ),
                     ],
                   ),
@@ -1197,7 +1189,7 @@ class _ArchiveState extends State<Archive> {
               },
             );
           } else {
-            return Center(child: const CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
         },
       ),
