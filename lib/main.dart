@@ -137,6 +137,8 @@ class PlusMinusEntryState extends State<PlusMinusEntry> {
   bool needToDo = false;
   bool rightNow = false;
   bool forMe = false;
+  bool oneTask = false;
+  bool fiveMin = false;
 
   @override
   Widget build(BuildContext context) {
@@ -294,7 +296,7 @@ class PlusMinusEntryState extends State<PlusMinusEntry> {
                   return StatefulBuilder(builder: (context, setState) {
                     return AlertDialog(
                       content: SizedBox(
-                        height: 280,
+                        height: 410,
                         width: 200,
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
@@ -351,6 +353,38 @@ class PlusMinusEntryState extends State<PlusMinusEntry> {
                                 const Text('Нет'),
                               ],
                             ),
+                            const Text('Одношаговая?'),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Text('Да'),
+                                Switch(
+                                  value: oneTask,
+                                  onChanged: (val) {
+                                    setState(() {
+                                      oneTask = val;
+                                    });
+                                  },
+                                ),
+                                const Text('Нет'),
+                              ],
+                            ),
+                            const Text('Можно сделать за 5 минут?'),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Text('Да'),
+                                Switch(
+                                  value: fiveMin,
+                                  onChanged: (val) {
+                                    setState(() {
+                                      fiveMin = val;
+                                    });
+                                  },
+                                ),
+                                const Text('Нет'),
+                              ],
+                            ),
                             ElevatedButton(
                               onPressed: () async {
                                 if (needToDo) {
@@ -384,10 +418,46 @@ class PlusMinusEntryState extends State<PlusMinusEntry> {
                                       .pop();
                                   Navigator.of(context, rootNavigator: true)
                                       .pop();
+                                } else if (oneTask) {
+                                  widget.database.moveTaskToProject(Task(
+                                    id: widget.task.id,
+                                    list: widget.task.list,
+                                    name: widget.task.name,
+                                    done: widget.task.done,
+                                    project: widget.task.project,
+                                  ));
+                                  Navigator.of(context, rootNavigator: true)
+                                      .pop();
+                                  Navigator.of(context, rootNavigator: true)
+                                      .pop();
+                                } else if (!fiveMin) {
+                                  const snackBar = SnackBar(
+                                    content: Text('Сделай сейчас!'),
+                                  );
+                                  Navigator.of(context, rootNavigator: true)
+                                      .pop();
+                                  Navigator.of(context, rootNavigator: true)
+                                      .pop();
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(snackBar);
+                                } else {
+                                  widget.database.updateTask(Task(
+                                    id: widget.task.id,
+                                    list: 'Next',
+                                    name: widget.task.name,
+                                    done: widget.task.done,
+                                    project: widget.task.project,
+                                  ));
+                                  Navigator.of(context, rootNavigator: true)
+                                      .pop();
+                                  Navigator.of(context, rootNavigator: true)
+                                      .pop();
                                 }
                                 needToDo = false;
                                 rightNow = false;
                                 forMe = false;
+                                fiveMin = false;
+                                oneTask = false;
                               },
                               child: const Text(
                                 'Поехали',
